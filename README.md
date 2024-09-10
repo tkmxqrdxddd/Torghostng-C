@@ -6,3 +6,4 @@ I just remade it into actually usable language
 
 
 You need curl-dev package
+run install.sh as root
