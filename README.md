@@ -7,3 +7,5 @@ I just remade it into actually usable language
 
 You need curl-dev package
 run install.sh as root
+
+Before you make issue with installation INSTALL THE FUCKING curl-dev package
