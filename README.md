@@ -10,6 +10,13 @@ run install.sh as root
 
 Before you make issue with installation INSTALL THE FUCKING curl-dev package
 
+# Usage 
+| `torghostng --help` | Prints usage |
+| `torghostng -s` | starts the program |
+| `torghostng -x` | stops the program |
+| `torghostng -r` | renews torproxy |
+| `torghostng -c` | checks if you are connected to torproxy|
+
 ## Installation
 
 ```bash
