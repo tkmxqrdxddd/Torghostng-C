@@ -5,12 +5,13 @@ This script belongs to [SusmithKrishnan](https://github.com/SusmithKrishnan/torg
 I just remade it into actually usable language
 
 
-You need curl-dev and gcc package,
-run install.sh as root
+## Dependencies
 
-Before you make issue with installation INSTALL THE FUCKING curl-dev package
+`curl-dev`
+`gcc`
 
-# Usage 
+
+## Usage 
 | Command           | Description |
 | ---                | ---        | 
 | `torghostng --help` | Prints usage |
