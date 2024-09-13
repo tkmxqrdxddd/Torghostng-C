@@ -1,1 +1,1 @@
-gcc -o torghostng torghostng.c -lcurl && sudo mv /usr/bin/ && sudo chmod +x /usr/bin/torghostng 
+gcc -o torghostng torghostng.c -lcurl && sudo mv torghostng /usr/bin/ && sudo chmod +x /usr/bin/torghostng 
