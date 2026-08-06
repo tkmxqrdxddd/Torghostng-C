@@ -39,7 +39,7 @@ install -Dm0644 packaging/man/torghostng.1 %{buildroot}%{_mandir}/man1/torghostn
 
 %files
 %{_bindir}/torghostng
-%{_mandir}/man1/torghostng.1
+%{_mandir}/man1/torghostng.1*
 %doc README.md LICENSE
 
 %changelog
