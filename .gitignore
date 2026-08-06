@@ -1,0 +1,5 @@
+/torghostng
+src/*.o
+src/*.d
+*.log
+*.tmp

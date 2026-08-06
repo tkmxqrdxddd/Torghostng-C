@@ -28,6 +28,9 @@ echo "Building TorGhostNG..."
 make clean
 make
 
+echo "Running test suite..."
+make test
+
 echo "Installing TorGhostNG..."
 make install
 

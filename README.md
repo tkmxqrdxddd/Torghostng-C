@@ -2,9 +2,23 @@
 
 Remake of torghostng in C.
 
-This script belongs to [SusmithKrishnan](https://github.com/SusmithKrishnan/torghost).
-I just remade it into actually usable language.
-I may and may not maintain this repo, if there is something you truly need or if it doesn't work, the surest way to obtain it is by forking the repo and doing it yourself.
+This project belongs to [SusmithKrishnan](https://github.com/SusmithKrishnan/torghost).
+It was rewritten in C, refactored into modules with proper error handling,
+rollback on failure, and a safer networking approach.
+
+## Features
+
+- Redirects TCP traffic through Tor (SOCKS5 `127.0.0.1:9050`)
+- Full DNS resolution through Tor:
+  - `DNSPort` added to `/etc/tor/torrc`
+  - UDP/TCP DNS queries DNAT'd to Tor's DNS port
+  - `/etc/resolv.conf` backed up and switched to route via Tor
+- Optional exit node selection (e.g. `--start DE`)
+- Idempotent, self-contained iptables setup via a dedicated `TORGHOSTNG`
+  chain — your other firewall rules (Docker, VPN, ...) are never touched
+- Automatic rollback of every change if startup fails or is interrupted
+- Tor connection verification through Tor itself (`check.torproject.org`),
+  including the exit IP
 
 ## Dependencies
 
@@ -13,17 +27,18 @@ I may and may not maintain this repo, if there is something you truly need or if
 
 ## Building
 
-### Using Make
-
 ```bash
 make
 ```
 
-### Manual compilation
+## Testing
 
 ```bash
-gcc -Wall -Wextra -O2 -o torghostng torghostng.c -lcurl
+make test
 ```
+
+Runs CLI-level tests (argument parsing, exit codes). Safe to run without
+root — no system modifications are made.
 
 ## Installation
 
@@ -44,15 +59,18 @@ sudo make install
 
 ## Usage
 
-| Command           | Description |
-| ----------------- | ----------- |
-| `torghostng --help` | Prints usage |
+| Command            | Description |
+| ------------------ | ----------- |
+| `torghostng --help`  | Prints usage |
 | `torghostng --version` | Display version |
-| `torghostng -s` | Start the Tor proxy |
-| `torghostng -s DE` | Start with German exit node |
-| `torghostng -x` | Stop the Tor proxy |
-| `torghostng -r` | Renew Tor circuit |
-| `torghostng -c` | Check Tor connection and IP |
+| `torghostng -s`     | Start the Tor proxy |
+| `torghostng -s DE`  | Start with German exit node |
+| `torghostng -x`     | Stop the Tor proxy and restore all settings |
+| `torghostng -r`     | Renew Tor circuit |
+| `torghostng -c`     | Check Tor connection and exit IP |
+
+Exit node codes are 2-letter ISO country codes (case-insensitive, e.g. `DE`,
+`us`). When set, `ExitNodes` and `StrictNodes 1` are added to the Tor config.
 
 ## Examples
 
@@ -73,6 +91,45 @@ torghostng --check
 sudo torghostng --stop
 ```
 
-## Note
+## How it works
 
-This program must be run as root for network configuration changes.
+`--start` performs the following steps, rolling back everything if any step
+fails:
+
+1. Disable IPv6 via `sysctl`
+2. Append a `TORGHOSTNG-CONFIG-BEGIN/END` block to `/etc/tor/torrc`
+   (`DNSPort 127.0.0.1:5353`, optional `ExitNodes`/`StrictNodes`)
+3. Back up `/etc/resolv.conf` and point DNS at a resolver that is DNAT'd
+   into Tor
+4. Start the `tor` service
+5. Create the `TORGHOSTNG` iptables chain in `nat`:
+   - `RETURN` for loopback, SSH (port 22) and Tor's own SOCKS port
+   - `REDIRECT` remaining TCP to port 9050
+   - `DNAT` UDP/TCP port 53 to Tor's `DNSPort`
+6. Verify the connection through Tor
+
+`--stop` reverses all changes (restores `resolv.conf`, removes only the
+`TORGHOSTNG` chain, re-enables IPv6, strips the torrc block) and restarts
+network services. The Tor daemon itself is left running.
+
+## Notes
+
+- Must be run as root for network configuration changes.
+- If you use `systemd-resolved`, its stub listener (`127.0.0.53`) may
+  intercept DNS before it reaches Tor; stop it or configure it to hand
+  DNS off to `127.0.0.1` while the proxy is active.
+- iptables `DNAT` requires the `iptables` legacy/nft userspace tools to be
+  installed on your distribution.
+
+## Project layout
+
+```
+src/
+  main.c    CLI parsing, signal handling, orchestration, rollback
+  core.c    TorghostNG state and lifecycle
+  util.c    logging, command execution, file helpers
+  net.c     IPv6, iptables chain, DNS configuration
+  tor.c     torrc edits, service control, circuit renewal
+  check.c   IP and Tor connection checks (libcurl)
+tests/      CLI test suite (make test)
+```
