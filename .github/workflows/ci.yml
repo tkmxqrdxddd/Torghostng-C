@@ -63,11 +63,16 @@ jobs:
       - name: Validate package
         run: rpm -qpl build/rpm/RPMS/*/*.rpm
 
+      - name: Stage package for upload
+        run: |
+          mkdir -p build/packages
+          cp build/rpm/RPMS/*/*.rpm build/packages/
+
       - name: Upload RPM artifact
         uses: actions/upload-artifact@v4
         with:
           name: torghostng-rpm
-          path: build/rpm/RPMS/*/*.rpm
+          path: build/packages/*.rpm
           if-no-files-found: error
 
   release:
