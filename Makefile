@@ -77,7 +77,9 @@ dist:
 	cd $(DIST_DIR) && tar -czf ../$(PACKAGE)-$(VERSION).tar.gz $(PACKAGE)-$(VERSION)
 
 rpm: dist
-	mkdir -p $(RPM_TOPDIR)/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+	mkdir -p $(RPM_TOPDIR)/BUILD $(RPM_TOPDIR)/BUILDROOT \
+		$(RPM_TOPDIR)/RPMS $(RPM_TOPDIR)/SOURCES \
+		$(RPM_TOPDIR)/SPECS $(RPM_TOPDIR)/SRPMS
 	cp $(BUILD_DIR)/$(PACKAGE)-$(VERSION).tar.gz $(RPM_TOPDIR)/SOURCES/
 	rpmbuild --define "_topdir $(RPM_TOPDIR)" -bb packaging/$(PACKAGE).spec
 
