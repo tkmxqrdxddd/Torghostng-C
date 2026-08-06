@@ -81,7 +81,7 @@ rpm: dist
 		$(RPM_TOPDIR)/RPMS $(RPM_TOPDIR)/SOURCES \
 		$(RPM_TOPDIR)/SPECS $(RPM_TOPDIR)/SRPMS
 	cp $(BUILD_DIR)/$(PACKAGE)-$(VERSION).tar.gz $(RPM_TOPDIR)/SOURCES/
-	rpmbuild --define "_topdir $(RPM_TOPDIR)" -bb packaging/$(PACKAGE).spec
+	rpmbuild --nodeps --define "_topdir $(RPM_TOPDIR)" -bb packaging/$(PACKAGE).spec
 
 clean:
 	rm -rf $(TARGET) $(OBJS) $(DEPS) $(BUILD_DIR)
