@@ -1,4 +1,5 @@
 /torghostng
+/build/
 src/*.o
 src/*.d
 *.log

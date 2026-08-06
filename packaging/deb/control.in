@@ -1,0 +1,19 @@
+Package: torghostng
+Version: @VERSION@
+Section: net
+Priority: optional
+Architecture: @ARCH@
+Maintainer: tkmxqrdxddd <tkmxqrd@gmail.com>
+Depends: tor,
+         iptables,
+         procps,
+         libcurl4 | libcurl4t64 | libcurl3
+Description: Tor proxy management tool
+ TorGhostNG redirects TCP traffic through the Tor network (SOCKS5
+ 127.0.0.1:9050), routes DNS through Tor's DNSPort, and optionally
+ restricts traffic to a specific exit country.
+ .
+ It manages the required system changes (iptables chain, resolv.conf,
+ torrc) itself and rolls all of them back on failure or when stopped.
+ .
+ Homepage: https://github.com/tkmxqrdxddd/Torghostng-C

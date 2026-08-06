@@ -1,0 +1,46 @@
+.TH TORGHOSTNG 1 "@DATE@" "TorGhostNG @VERSION@" "User Commands"
+.SH NAME
+torghostng \- route traffic through the Tor network
+.SH SYNOPSIS
+.B torghostng
+.RI [ option ]
+.RI [ ARG ]
+.SH DESCRIPTION
+.B TorGhostNG
+redirects TCP traffic through the Tor network using the SOCKS5 proxy on
+port 9050, routes DNS resolution through Tor, and optionally restricts
+the exit node to a chosen country.
+.SH OPTIONS
+.TP
+.BR \-s ", " \-\-start " [" EXIT_NODE ]
+Start the Tor proxy. Optional EXIT_NODE is a 2-letter ISO country code
+(e.g.\ DE, US). Changes are rolled back automatically if startup fails
+or is interrupted.
+.TP
+.BR \-x ", " \-\-stop
+Stop the proxy and restore system settings (iptables chain, resolv.conf,
+torrc, IPv6).
+.TP
+.BR \-r ", " \-\-renew
+Send SIGHUP to the Tor daemon to request a fresh circuit.
+.TP
+.BR \-c ", " \-\-check
+Verify the Tor connection and print the current exit IP.
+.TP
+.BR \-h ", " \-\-help
+Show usage information.
+.TP
+.BR \-v ", " \-\-version
+Show the version.
+.SH FILES
+.TP
+.I /etc/tor/torrc
+Edited at runtime; managed changes are marked with TORGHOSTNG-CONFIG
+comments and removed on stop.
+.TP
+.I /etc/resolv.conf
+Backed up and restored when the proxy is active.
+.SH NOTES
+Must be run as root for network configuration changes.
+.SH AUTHOR
+tkmxqrdxddd <tkmxqrd@gmail.com>

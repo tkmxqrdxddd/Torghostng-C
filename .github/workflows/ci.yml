@@ -2,7 +2,10 @@ name: CI
 
 on:
   push:
+    branches: [main]
+    tags: ['v*']
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -18,3 +21,68 @@ jobs:
 
       - name: Run tests
         run: make test
+
+  deb:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+
+      - name: Build package
+        run: |
+          make
+          make deb
+
+      - name: Validate package
+        run: dpkg-deb --info build/*.deb && dpkg-deb --contents build/*.deb
+
+      - name: Upload .deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: torghostng-deb
+          path: build/*.deb
+          if-no-files-found: error
+
+  rpm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev rpm
+
+      - name: Build package
+        run: |
+          make
+          make rpm
+
+      - name: Validate package
+        run: rpm -qpl build/rpm/RPMS/*/*.rpm
+
+      - name: Upload RPM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: torghostng-rpm
+          path: build/rpm/RPMS/*/*.rpm
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [deb, rpm]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Attach packages to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/torghostng-deb/*.deb
+            artifacts/torghostng-rpm/*.rpm

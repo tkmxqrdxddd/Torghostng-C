@@ -40,6 +40,39 @@ make test
 Runs CLI-level tests (argument parsing, exit codes). Safe to run without
 root — no system modifications are made.
 
+## Packaging
+
+Build a `.deb` (Debian/Ubuntu) or `.rpm` (RHEL/Fedora/SUSE) package:
+
+```bash
+make deb        # -> build/torghostng_<version>_<arch>.deb
+make rpm        # -> build/rpm/RPMS/<arch>/torghostng-<version>.rpm (needs rpmbuild)
+make dist       # -> build/torghostng-<version>.tar.gz source archive
+```
+
+`make deb` uses `dpkg-deb` when available and falls back to a self-contained
+packer otherwise, so it works on any distro. Packages ship the binary in
+`/usr/bin/`, a man page, and proper runtime dependencies (`tor`, `iptables`,
+`procps`, `libcurl`).
+
+Verify package builds locally without root:
+
+```bash
+./packaging/scripts/test-packages.sh
+```
+
+This checks the CLI suite, version consistency, the `.deb` archive
+structure/`control` fields, and runs a full `.rpm` build when `rpmbuild` is
+installed.
+
+### CI
+
+`.github/workflows/ci.yml` runs on every push/PR:
+- `build` — compile + `make test`
+- `deb` — build and validate the `.deb`, uploaded as an artifact
+- `rpm` — build and validate the `.rpm`, uploaded as an artifact
+- `release` — on `v*` tags, attaches both packages to a GitHub Release
+
 ## Installation
 
 ### Using install script
@@ -131,5 +164,10 @@ src/
   net.c     IPv6, iptables chain, DNS configuration
   tor.c     torrc edits, service control, circuit renewal
   check.c   IP and Tor connection checks (libcurl)
+packaging/
+  deb/            .deb control template
+  torghostng.spec RPM spec file
+  man/            man page
+  scripts/        self-contained .deb packer + local package tests
 tests/      CLI test suite (make test)
 ```
